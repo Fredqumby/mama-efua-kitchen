@@ -177,6 +177,9 @@ function renderCart() {
           <span class="cart-item-price">GH₵${item.newPrice} each</span>
         </div>
         <div class="cart-item-right">
+          <button class="cart-item-delete" onclick="removeCartItem(${index})" aria-label="Remove item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
           <div class="cart-item-actions">
             <button class="qty-btn" onclick="updateCartItemQty(${index}, -1)">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -216,6 +219,12 @@ function updateCartItemQty(index, amount) {
   renderCart();
 }
 
+function removeCartItem(index) {
+  cart.splice(index, 1);
+  updateCartCount();
+  renderCart();
+}
+
 function openCheckoutModal() {
   if (cart.length === 0) return;
   const total = cart.reduce((sum, item) => sum + (item.newPrice * item.qty), 0);
@@ -231,8 +240,16 @@ function sendWhatsAppOrder() {
   const location = document.getElementById('customerLocation').value.trim();
   const note     = document.getElementById('customerNote').value.trim();
 
+  const nameInput    = document.getElementById('customerName');
+  const phoneInput   = document.getElementById('customerPhone');
+
+  nameInput.classList.remove('error');
+  phoneInput.classList.remove('error');
+
   if (!name || !phone) {
-    alert('Please enter your name and WhatsApp number');
+    if (!name) nameInput.classList.add('error');
+    if (!phone) phoneInput.classList.add('error');
+    showError('Please fill in your name and WhatsApp number');
     return;
   }
 
@@ -305,6 +322,19 @@ function showToast(msg) {
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2200);
 }
+
+// Error toast
+function showError(msg) {
+  const toast = document.getElementById('errorToast');
+  toast.querySelector('.error-toast-msg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Clear field error on input
+document.querySelectorAll('#customerName, #customerPhone').forEach(input => {
+  input.addEventListener('input', () => input.classList.remove('error'));
+});
 
 // Info modal
 function openInfoModal() {
